@@ -37,8 +37,8 @@ const Navigation = () => {
                     active={activeTab === 'stock'}
                     onClick={() => setActiveTab('stock')}
                     icon={<GridFour className="text-blue-600" />}
-                    label="Stock"
-                    sublabel="Live Stock View"
+                    label="Inventory"
+                    sublabel="Manage Items"
                     bgColor="bg-blue-50"
                 />
                 <NavButton
