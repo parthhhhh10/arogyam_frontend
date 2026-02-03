@@ -167,7 +167,7 @@ const Shell = ({ children }) => {
                         <img
                             src="/logo.png"
                             alt="Arogyam Logo"
-                            className="h-24 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                            className="h-24 w-auto object-contain hover:scale-105 transition-transform duration-300 rounded-2xl"
                         />
                     </div>
 

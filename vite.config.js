@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
-// https://vitejs.dev/config/
+// https://vitejs.dev/config/ - Updated for Arogyam Logo
 export default defineConfig({
   plugins: [
     react(),

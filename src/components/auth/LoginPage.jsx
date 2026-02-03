@@ -23,7 +23,18 @@ export default function LoginPage({ onDemoLogin }) {
     const [isLoading, setIsLoading] = useState(false);
 
     if (!isLoaded) {
-        return <div className="flex items-center justify-center min-h-screen bg-slate-50">Loading authentication...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-slate-50">
+                <video
+                    src="/Arogyam_Spinner.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-24 h-24"
+                />
+            </div>
+        );
     }
 
     const handleSubmit = async (e) => {
