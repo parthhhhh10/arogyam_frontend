@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useArogyam } from './context/ArogyamContext';
 import Shell from './components/layout/Shell';
 import SetupPage from './components/setup/SetupPage';
@@ -6,53 +6,76 @@ import InventoryPage from './components/inventory/InventoryPage';
 import RefillPage from './components/refill/RefillPage';
 import StatsPage from './components/stats/StatsPage';
 import EmergencyPage from './components/emergency/EmergencyPage';
-import ToastContainer from './components/ui/ToastContainer';
+import DoctorPage from './components/doctor/DoctorPage';
+import StockPage from './components/stock/StockPage';
+import Onboarding from './components/auth/Onboarding';
+import ChatPage from './components/chat/ChatPage';
 
-import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
+import ToastContainer from './components/ui/ToastContainer';
 import LoginPage from "./components/auth/LoginPage";
 
 const App = () => {
-  const { activeTab } = useArogyam();
-  const [isDemo, setIsDemo] = React.useState(false);
+  const { activeTab, userRole } = useArogyam();
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
-  // Handle Clerk SSO redirect
-  if (window.location.pathname === '/sso-callback') {
-    return <AuthenticateWithRedirectCallback />;
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const path = currentPath.replace(/\/$/, '').toLowerCase() || '/';
+
+  // 1. Standalone Public Routes (No Auth Required)
+  if (path === '/login') {
+    return <LoginPage />;
+  }
+  if (path === '/onboarding') {
+    return <Onboarding onComplete={() => { window.location.href = '/setup'; }} />;
+  }
+  if (path === '/chat') {
+    return <ChatPage />;
   }
 
-  if (isDemo) {
-    return (
-      <Shell>
-        <div className="relative min-h-[400px]">
-          {activeTab === 'setup' && <SetupPage />}
-          {activeTab === 'stock' && <InventoryPage />}
-          {activeTab === 'refill' && <RefillPage />}
-          {activeTab === 'history' && <StatsPage />}
-          {activeTab === 'emergency' && <EmergencyPage />}
-        </div>
-        <ToastContainer />
-      </Shell>
-    );
+  // 2. Shell-wrapped Public Routes (No Auth Required)
+  let content = null;
+  if (path === '/doctor' || path === '/patients') {
+    content = <DoctorPage />;
+  } else if (path === '/setup') {
+    content = <SetupPage />;
+  } else if (path === '/inventory') {
+    content = <InventoryPage />;
+  } else if (path === '/refill') {
+    content = <RefillPage />;
+  } else if (path === '/stats' || path === '/history') {
+    content = <StatsPage />;
+  } else if (path === '/emergency' || path === '/sos') {
+    content = <EmergencyPage />;
+  } else if (path === '/stock') {
+    content = <StockPage />;
+  } else {
+    // Default fallback route '/' based on activeTab or role
+    if (userRole === 'doctor') {
+      content = <DoctorPage />;
+    } else {
+      if (activeTab === 'stock') content = <InventoryPage />;
+      else if (activeTab === 'refill') content = <RefillPage />;
+      else if (activeTab === 'history' || activeTab === 'stats') content = <StatsPage />;
+      else if (activeTab === 'emergency') content = <EmergencyPage />;
+      else if (activeTab === 'patients' || activeTab === 'doctor') content = <DoctorPage />;
+      else content = <SetupPage />;
+    }
   }
 
   return (
-    <>
-      <SignedOut>
-        <LoginPage onDemoLogin={() => setIsDemo(true)} />
-      </SignedOut>
-      <SignedIn>
-        <Shell>
-          <div className="relative min-h-[400px]">
-            {activeTab === 'setup' && <SetupPage />}
-            {activeTab === 'stock' && <InventoryPage />}
-            {activeTab === 'refill' && <RefillPage />}
-            {activeTab === 'history' && <StatsPage />}
-            {activeTab === 'emergency' && <EmergencyPage />}
-          </div>
-          <ToastContainer />
-        </Shell>
-      </SignedIn>
-    </>
+    <Shell>
+      <div className="relative min-h-[400px]">
+        {content}
+      </div>
+      <ToastContainer />
+    </Shell>
   );
 };
 

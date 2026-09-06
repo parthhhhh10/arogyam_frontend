@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
-import useArogyam from '../../hooks/useArogyam';
+import { useArogyam } from '../../hooks/useArogyam';
 import {
     Settings,
     Package,
@@ -15,7 +15,8 @@ import {
     Menu,
     X,
     Sun,
-    Moon
+    Moon,
+    FileText
 } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -143,16 +144,37 @@ const ThemeSwitch = () => {
 }
 
 const Shell = ({ children }) => {
-    const { activeTab, setActiveTab } = useArogyam();
+    const { activeTab, setActiveTab, userRole, setUserToken, userToken } = useArogyam();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    const menuItems = [
+    const handleLogout = () => {
+        setUserToken(null);
+        localStorage.removeItem('arogyam_user_token');
+    };
+
+    // Set initial active tab based on user role
+    React.useEffect(() => {
+        if (userRole === 'doctor' && activeTab !== 'patients') {
+            setActiveTab('patients');
+        } else if (userRole === 'patient' && (activeTab === 'patients' || activeTab === 'prescriptions')) {
+            setActiveTab('setup');
+        }
+    }, [userRole]);
+
+    const patientMenuItems = [
         { id: 'setup', label: 'Patient Setup', icon: Settings },
         { id: 'stock', label: 'Inventory', icon: Package },
         { id: 'refill', label: 'Prescriptions', icon: ShoppingCart },
         { id: 'history', label: 'Health Analytics', icon: BarChart3 },
         { id: 'emergency', label: 'SOS / Support', icon: AlertCircle, badge: '!' },
     ];
+
+    const doctorMenuItems = [
+        { id: 'patients', label: 'Patient Management', icon: User },
+        { id: 'prescriptions', label: 'Prescriptions', icon: FileText },
+    ];
+
+    const menuItems = userRole === 'doctor' ? doctorMenuItems : patientMenuItems;
 
     return (
         <div className="flex min-h-screen bg-background font-sans text-foreground">
@@ -172,18 +194,32 @@ const Shell = ({ children }) => {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 space-y-2">
-                        {menuItems.map((item) => (
-                            <SidebarItem
-                                key={item.id}
-                                icon={item.icon}
-                                label={item.label}
-                                active={activeTab === item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                badge={item.badge}
-                            />
-                        ))}
-                    </nav>
+                        {menuItems.map((item) => {
+                            const routeMap = {
+                                setup: '/setup',
+                                stock: '/inventory',
+                                refill: '/refill',
+                                history: '/stats',
+                                emergency: '/emergency',
+                                patients: '/doctor',
+                                prescriptions: '/refill'
+                            };
+                            const targetRoute = routeMap[item.id] || `/${item.id}`;
+                            return (
+                                <SidebarItem
+                                    key={item.id}
+                                    icon={item.icon}
+                                    label={item.label}
+                                    active={activeTab === item.id || window.location.pathname.replace(/\/$/, '') === targetRoute}
+                                    onClick={() => {
+                                        setActiveTab(item.id);
+                                        window.history.pushState({}, '', targetRoute);
+                                        window.dispatchEvent(new Event('popstate'));
+                                    }}
+                                    badge={item.badge}
+                                />
+                            );
+                        })}
 
                     {/* User Profile Mini */}
                     <div className="mt-auto pt-6 border-t border-border">
@@ -192,10 +228,16 @@ const Shell = ({ children }) => {
                                 <User className="text-muted-foreground w-5 h-5" />
                             </div>
                             <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-bold text-foreground truncate">Dr. Rajesh Kumar</p>
-                                <p className="text-[10px] text-muted-foreground truncate">Chief Surgeon</p>
+                                <p className="text-sm font-bold text-foreground truncate">
+                                    {userRole === 'doctor' ? 'Doctor Portal' : 'Patient Portal'}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate capitalize">{userRole}</p>
                             </div>
-                            <button className="text-muted-foreground hover:text-destructive transition-colors">
+                            <button
+                                onClick={handleLogout}
+                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                title="Logout"
+                            >
                                 <LogOut className="w-4 h-4" />
                             </button>
                         </div>
@@ -249,6 +291,7 @@ const Shell = ({ children }) => {
                     {children}
                 </main>
             </div>
+
         </div>
     );
 };

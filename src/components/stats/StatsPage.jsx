@@ -15,6 +15,9 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { Card, Badge, Button, cn } from '../ui/MedicalUI';
+import { useArogyam } from '../../hooks/useArogyam';
+import ScheduleCalendar from '../setup/ScheduleCalendar';
+import DispensePanel from './DispensePanel';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -119,6 +122,8 @@ const StatsPage = () => {
         }]
     };
 
+    const { medicineDispensed } = useArogyam();
+    
     return (
         <div className="space-y-8 pb-12">
             {/* Report Header */}
@@ -134,17 +139,33 @@ const StatsPage = () => {
                         </p>
                     </div>
                 </div>
-                <Button variant="secondary" size="sm" className="mt-4 md:mt-0 gap-2">
-                    <Download className="w-4 h-4" />
-                    Print Clinical Report
-                </Button>
+                <div className="flex items-center gap-4 mt-4 md:mt-0">
+                    <div className="text-right">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Today's Dose Status</p>
+                        <p className="text-xl font-bold text-emerald-600">{medicineDispensed} Doses Dispensed</p>
+                    </div>
+                    <Button variant="secondary" size="sm" className="gap-2">
+                        <Download className="w-4 h-4" />
+                        Clinical Report
+                    </Button>
+                </div>
+            </div>
+
+            {/* Calendar and Dispense Panel */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <ScheduleCalendar />
+                </div>
+                <div>
+                    <DispensePanel />
+                </div>
             </div>
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatMini label="Compliance Rate" value="94.2%" icon={Activity} color="bg-medical-primary" trend={5} />
+                <StatMini label="Dispensed Today" value={medicineDispensed} icon={Target} color="bg-emerald-500" />
                 <StatMini label="On-Time Delivery" value="88.7%" icon={Clock} color="bg-blue-500" trend={2.1} />
-                <StatMini label="Missed Events" value="03" icon={AlertCircle} color="bg-red-500" trend={-12} />
                 <StatMini label="Longest Streak" value="12 Days" icon={Trophy} color="bg-amber-500" />
             </div>
 

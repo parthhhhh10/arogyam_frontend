@@ -14,7 +14,7 @@ import {
 import { Card, Button, Input, Badge, cn } from '../ui/MedicalUI';
 
 const InventoryPage = () => {
-    const { trays } = useArogyam();
+    const { trays, medicineDispensed } = useArogyam();
     const [searchQuery, setSearchQuery] = useState('');
 
     // Filter trays based on search
@@ -23,8 +23,7 @@ const InventoryPage = () => {
     );
 
     // Calculate totals
-    const totalItems = trays.length;
-    const lowStockItems = trays.filter(t => t.stock.filter(s => s === 1).length < 3).length;
+    const remainingMedicine = trays.reduce((total, t) => total + (t.stockMorning || 0) + (t.stockAfternoon || 0) + (t.stockEvening || 0), 0);
 
     return (
         <div className="space-y-6 pb-20 md:pb-12">
@@ -50,7 +49,7 @@ const InventoryPage = () => {
                     <div className="flex items-start justify-between">
                         <div>
                             <p className="text-xs font-bold text-slate-500 uppercase">Total Medicines</p>
-                            <h3 className="text-2xl font-bold text-slate-800 mt-1">{totalItems}</h3>
+                            <h3 className="text-2xl font-bold text-slate-800 mt-1">{trays.length}</h3>
                         </div>
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <Package className="w-5 h-5 text-blue-600" />
@@ -60,11 +59,11 @@ const InventoryPage = () => {
                 <Card className="p-4 bg-white border-slate-200 shadow-sm">
                     <div className="flex items-start justify-between">
                         <div>
-                            <p className="text-xs font-bold text-slate-500 uppercase">Low Stock</p>
-                            <h3 className="text-2xl font-bold text-slate-800 mt-1">{lowStockItems}</h3>
+                            <p className="text-xs font-bold text-slate-500 uppercase">Remaining Medicine</p>
+                            <h3 className="text-2xl font-bold text-slate-800 mt-1">{remainingMedicine}</h3>
                         </div>
-                        <div className="p-2 bg-red-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 text-red-600" />
+                        <div className="p-2 bg-green-50 rounded-lg">
+                            <Package className="w-5 h-5 text-green-600" />
                         </div>
                     </div>
                 </Card>
@@ -77,6 +76,18 @@ const InventoryPage = () => {
                         </div>
                         <div className="p-2 bg-amber-50 rounded-lg">
                             <Calendar className="w-5 h-5 text-amber-600" />
+                        </div>
+                    </div>
+                </Card>
+                <Card className="p-4 bg-white border-slate-200 shadow-sm hidden md:block">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-xs font-bold text-slate-500 uppercase">Medicine Dispensed</p>
+                            <h3 className="text-2xl font-bold text-slate-800 mt-1">{medicineDispensed}</h3>
+                            <p className="text-[10px] text-slate-400">From ESP/IR Sensor</p>
+                        </div>
+                        <div className="p-2 bg-purple-50 rounded-lg">
+                            <Pill className="w-5 h-5 text-purple-600" />
                         </div>
                     </div>
                 </Card>
@@ -121,10 +132,10 @@ const InventoryPage = () => {
 };
 
 const InventoryItem = ({ tray }) => {
-    const stockCount = tray.stock.filter(s => s === 1).length;
-    const maxStock = 10; // Assuming 10 slots per tray
-    const percentage = Math.round((stockCount / maxStock) * 100);
-    const isLow = percentage < 30;
+    const stockCount = (tray.stockMorning || 0) + (tray.stockAfternoon || 0) + (tray.stockEvening || 0);
+    const maxStock = (tray.morning * 4) + (tray.afternoon * 4) + (tray.evening * 4);
+    const percentage = maxStock > 0 ? Math.round((stockCount / maxStock) * 100) : 0;
+    const isLow = percentage > 0 && percentage < 30;
 
     return (
         <Card className="p-4 md:p-6 bg-white hover:shadow-md transition-shadow border-slate-200 group">

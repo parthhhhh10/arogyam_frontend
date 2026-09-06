@@ -24,6 +24,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import ScheduleCalendar from './ScheduleCalendar';
 
 const AccordionDisabled = () => {
     return (
@@ -92,11 +93,16 @@ const DoseSelector = ({ label, sublabel, icon: Icon, color, value, time, onValue
 const SetupPage = () => {
     const {
         trays, addTray, removeTray, updateTray,
-        sosTrayId, setSOSTray, autoFillDemo, simulateDose, showToast
+        sosTrayId, setSOSTray, autoFillDemo, simulateDose, showToast,
+        selectedDate
     } = useArogyam();
+
+    const [showTrayOptions, setShowTrayOptions] = React.useState(false);
 
     return (
         <div className="space-y-8 pb-12">
+            <ScheduleCalendar />
+            
             {/* Quick Actions Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm">
                 <div>
@@ -106,20 +112,49 @@ const SetupPage = () => {
                     </h3>
                     <p className="text-sm text-muted-foreground">Define medicine schedule and electronic dispenser mapping.</p>
                 </div>
-                <div className="flex gap-3 w-full sm:w-auto">
-                    <Button variant="outline" size="sm" onClick={autoFillDemo} className="flex-1 sm:flex-none gap-2">
-                        <Zap className="w-4 h-4 text-amber-500" />
-                        Auto-Fill Demo
-                    </Button>
-                    <Button variant="default" size="sm" onClick={addTray} className="flex-1 sm:flex-none gap-2">
-                        <Plus className="w-4 h-4" />
-                        New Tray
-                    </Button>
+                <div className="flex gap-3 w-full sm:w-auto relative">
+
+                    <div className="relative flex-1 sm:flex-none">
+                        <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={() => setShowTrayOptions(!showTrayOptions)} 
+                            className="w-full gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            New Tray
+                        </Button>
+                        
+                        {showTrayOptions && (
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                <button 
+                                    className="w-full px-4 py-3 text-left text-sm font-semibold hover:bg-muted flex items-center gap-2 border-b border-border transition-colors text-foreground"
+                                    onClick={() => {
+                                        addTray(false);
+                                        setShowTrayOptions(false);
+                                    }}
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                    Normal Tray
+                                </button>
+                                <button 
+                                    className="w-full px-4 py-3 text-left text-sm font-semibold hover:bg-muted flex items-center gap-2 transition-colors text-destructive"
+                                    onClick={() => {
+                                        addTray(true);
+                                        setShowTrayOptions(false);
+                                    }}
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-destructive" />
+                                    SOS Tray
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
             {/* Trays Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
                 {trays.map(tray => (
                     <div key={tray.id} className="p-0 border border-border rounded-xl hover:border-primary/30 transition-all bg-card shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
@@ -131,12 +166,21 @@ const SetupPage = () => {
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">H/W TRAY 0{tray.id}</span>
                                         {tray.isSOS && <Badge variant="red" className="text-[8px] px-1 bg-destructive text-destructive-foreground">SOS</Badge>}
+                                        <div className="flex items-center gap-1.5 ml-auto">
+                                            <Badge variant="blue" className="text-[10px] bg-sky-100 text-sky-800">
+                                                Total: {tray.morning + tray.afternoon + tray.evening} Pill{ (tray.morning + tray.afternoon + tray.evening) !== 1 ? 's' : '' } / day
+                                            </Badge>
+                                        </div>
                                     </div>
-                                    <Input
-                                        className="h-8 py-0 px-0 border-none font-bold text-foreground focus-visible:ring-0 bg-transparent text-lg shadow-none"
-                                        value={tray.name}
-                                        onChange={(e) => updateTray(tray.id, 'name', e.target.value)}
-                                    />
+                                    <div className="relative group/input">
+                                        <Input
+                                            className="h-8 py-0 px-0 border-none font-bold text-foreground focus-visible:ring-0 bg-transparent text-lg shadow-none"
+                                            value={tray.name}
+                                            placeholder="Medicine Name (e.g., Pantocid)"
+                                            onChange={(e) => updateTray(tray.id, 'name', e.target.value)}
+                                        />
+                                        <div className="absolute left-0 bottom-[-2px] w-0 group-focus-within/input:w-full h-[2px] bg-primary transition-all duration-300" />
+                                    </div>
                                 </div>
                             </div>
                             <Button
@@ -184,52 +228,12 @@ const SetupPage = () => {
                 ))}
             </div>
 
+
+
             {/* Accordion FAQ Section */}
             <div className="bg-card rounded-xl border border-border p-6 mt-8">
                 <h3 className="font-bold text-foreground mb-4">Common Misconceptions</h3>
                 <AccordionDisabled />
-            </div>
-
-            {/* System Testing & Persistence */}
-            <div className="flex flex-col lg:flex-row gap-8 mt-8">
-                <div className="flex-1 p-6 bg-slate-900 rounded-xl border-none text-white overflow-hidden relative">
-                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                        <Zap className="w-32 h-32" />
-                    </div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-6">
-                            <div className="p-2 bg-slate-800 rounded-lg">
-                                <Zap className="w-5 h-5 text-amber-400" />
-                            </div>
-                            <div>
-                                <h4 className="font-bold">Hardware Simulation</h4>
-                                <p className="text-xs text-slate-400">Trigger manual dispense events to verify stepper calibration.</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                            <Button variant="outline" className="bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 gap-2 h-auto py-4 text-white hover:text-white" onClick={() => simulateDose('morning')}>
-                                <Sun className="w-3 h-3" /> Morning
-                            </Button>
-                            <Button variant="outline" className="bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 gap-2 h-auto py-4 text-white hover:text-white" onClick={() => simulateDose('afternoon')}>
-                                <CloudSun className="w-3 h-3" /> Noon
-                            </Button>
-                            <Button variant="outline" className="bg-slate-800 hover:bg-slate-700 text-xs border border-slate-700 gap-2 h-auto py-4 text-white hover:text-white" onClick={() => simulateDose('evening')}>
-                                <Moon className="w-3 h-3" /> Night
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-4 w-full lg:w-72">
-                    <Button
-                        size="lg"
-                        className="h-full py-8 gap-3 text-lg font-bold shadow-lg bg-teal-600 hover:bg-teal-700 text-white"
-                        onClick={() => showToast("✅ Schedule Saved", "Medical protocols synchronized with hardware.", "bg-teal-600 text-white")}
-                    >
-                        <Save className="w-6 h-6" />
-                        Apply Protocol
-                    </Button>
-                </div>
             </div>
         </div>
     );

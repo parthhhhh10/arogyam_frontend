@@ -19,15 +19,23 @@ import { useArogyam } from '../../hooks/useArogyam';
 import { Button, Card, Badge, cn } from '../ui/MedicalUI';
 
 const EmergencyPage = () => {
-    const { triggerEmergencySOS, trays } = useArogyam();
+    const { triggerEmergencySOS, trays, initiateTraumaCall, emergencyContact, assignedDoctor } = useArogyam();
     const sosTray = trays.find(t => t.isSOS);
     const sosStock = sosTray ? sosTray.stock.filter(s => s === 1).length : 0;
 
     const contacts = [
-        { icon: Ambulance, label: 'Ambulance (STAT)', sub: 'Local Emergency 108', color: 'bg-red-500' },
-        { icon: Hospital, label: 'Trauma Center', sub: 'Apollo Hospital', color: 'bg-blue-600' },
-        { icon: Stethoscope, label: 'Primary Physician', sub: 'Dr. Rajesh Kumar', color: 'bg-emerald-600' },
-        { icon: UserPlus, label: 'Next of Kin', sub: 'Emergency Contacts', color: 'bg-purple-600' },
+        { icon: Ambulance, label: 'Ambulance (STAT)', sub: 'Local Emergency 108', color: 'bg-red-500', action: () => window.location.href = 'tel:108' },
+        { icon: Hospital, label: 'Trauma Center', sub: 'Live Nearest Center', color: 'bg-blue-600', action: initiateTraumaCall },
+        { icon: Stethoscope, label: 'Primary Physician', sub: assignedDoctor?.name || 'Your Doctor', color: 'bg-emerald-600', action: () => {
+            if (assignedDoctor?.phone) {
+                window.location.href = `tel:${assignedDoctor.phone}`;
+            }
+        }},
+        { icon: UserPlus, label: 'Emergency Contact', sub: emergencyContact || 'Not set', color: 'bg-purple-600', action: () => {
+            if (emergencyContact) {
+                window.location.href = `tel:${emergencyContact.replace(/\D/g, '')}`;
+            }
+        }},
     ];
 
     return (
@@ -49,6 +57,7 @@ const EmergencyPage = () => {
                         {contacts.map((contact, i) => (
                             <button
                                 key={i}
+                                onClick={contact.action}
                                 className="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-medical-primary/20 transition-all text-left"
                             >
                                 <div className={cn("p-2 rounded-lg w-fit mb-4 text-white", contact.color)}>

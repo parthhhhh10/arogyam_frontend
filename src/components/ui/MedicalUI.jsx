@@ -8,11 +8,11 @@ export function cn(...inputs) {
 
 export const Button = React.forwardRef(({ className, variant = 'primary', size = 'md', ...props }, ref) => {
     const variants = {
-        primary: 'bg-medical-primary text-white hover:bg-medical-secondary shadow-sm hover:shadow-md',
-        secondary: 'bg-white text-medical-text-main border border-medical-border hover:bg-slate-50',
-        ghost: 'bg-transparent text-medical-text-main hover:bg-slate-100',
-        danger: 'bg-red-500 text-white hover:bg-red-600 shadow-sm',
-        outline: 'bg-transparent border border-medical-primary text-medical-primary hover:bg-medical-primary/5',
+        primary: 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm hover:shadow-md dark:bg-teal-600 dark:hover:bg-teal-500',
+        secondary: 'bg-secondary text-secondary-foreground border border-border hover:bg-muted',
+        ghost: 'bg-transparent text-foreground hover:bg-muted',
+        danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
+        outline: 'bg-transparent border border-teal-600 text-teal-600 hover:bg-teal-600/10 dark:text-teal-400 dark:border-teal-500',
     };
 
     const sizes = {
@@ -43,14 +43,14 @@ export const Card = ({ className, children, ...props }) => (
 
 export const Badge = ({ className, variant = 'blue', children }) => {
     const variants = {
-        blue: 'bg-blue-50 text-blue-700 border-blue-200',
-        green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        red: 'bg-red-50 text-red-700 border-red-200',
-        slate: 'bg-slate-100 text-slate-700 border-slate-200',
+        blue: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
+        green: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+        red: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30',
+        slate: 'bg-secondary text-secondary-foreground border-border',
     };
 
     return (
-        <span className={cn('px-2 py-0.5 rounded-full text-xs font-semibold border', variants[variant], className)}>
+        <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold border inline-flex items-center gap-1', variants[variant], className)}>
             {children}
         </span>
     );
@@ -60,7 +60,7 @@ export const Input = React.forwardRef(({ className, ...props }, ref) => (
     <input
         ref={ref}
         className={cn(
-            'flex h-10 w-full rounded-lg border border-medical-border bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-medical-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-medical-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-lg border border-border bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
             className
         )}
         {...props}

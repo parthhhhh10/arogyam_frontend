@@ -30,6 +30,12 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
+  --color-medical-primary: #0d9488;
+  --color-medical-secondary: #0f766e;
+  --color-medical-border: hsl(var(--border));
+  --color-medical-text-main: hsl(var(--foreground));
+  --color-medical-text-muted: hsl(var(--muted-foreground));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -56,6 +62,15 @@
       height: 0;
     }
   }
+}
+
+.medical-card {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease-in-out;
 }
 
 :root {

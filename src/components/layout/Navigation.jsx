@@ -1,5 +1,5 @@
 import React from 'react';
-import useArogyam from '../../hooks/useArogyam';
+import { useArogyam } from '../../hooks/useArogyam';
 import { Pill, GridFour, Storefront, ChartLineUp, Phone, FileText, ShoppingCart, Info, Ambulance } from '@phosphor-icons/react';
 
 const NavButton = ({ active, onClick, icon, label, sublabel, bgColor }) => (
